@@ -5,13 +5,14 @@
 \end{quotation}
 
 \begin{figure}[H]
-    \centering
+    \begin{center}
     \includegraphics[width=0.6\textwidth]{../imgs/scheme.png}
     \caption{\parbox{0.6\textwidth}{Схема ударно-вибрационного механизма с кривошипношатунным возбудителем колебаний.}}
     \label{fig:scheme}
+    \end{center}
 \end{figure}
 
-\centering\subsection{Размерный вид}
+\subsection{Размерный вид}
 
 \begin{quotation}
 Колебания корпуса совершаются относительно того механизма, сумма
@@ -26,9 +27,11 @@
 свободного движения системы при $y_{pi} > 0$ может быть записано в виде
 \end{quotation}
 
-\Large\centering
+\begin{center}
+\Large
 $M\frac{{d^2 y}}{{d t^2}} = -Mg$\\[5mm]
 \normalsize
+\end{center}
 
 \begin{quotation}
 y - координата центра масс корпуса, отсчитываемая от наковальни,
@@ -41,9 +44,11 @@ g - ускорение силы тяжести.
 соответственно, то
 \end{quotation}
 
-\Large\centering
+\begin{center}
+\Large
 $\dot{y}_{pi}^+ = -R\dot{y}_{pi}^-$
 \normalsize
+\end{center}
 
 \begin{quotation}
 Положение эксцентриситетов длиной $r_i$
@@ -52,21 +57,26 @@ $\dot{y}_{pi}^+ = -R\dot{y}_{pi}^-$
 Тогда можно вывести соотношение:
 \end{quotation}
 
+\begin{center}
 \Large
 $y_{pi} = y - s_i + r_i \cos(\omega t - \varphi_i) - \sqrt{l_i^2 - r_i^2 \cos(\omega t - \varphi_i)}$
 \normalsize 
+\end{center}
 
 \begin{figure}[H]
-    \centering
+    \begin{center}
     \includegraphics[height=0.3\textheight]{../imgs/geometric-diagram.png}
     \caption{\parbox{0.25\textwidth}{Геометрическая схема.}}
     \label{fig:geometric-diagram}
+    \end{center}
 \end{figure}
 
-
+\begin{quotation}
 Получаем уравнения движения механизма в размерном виде:
+\end{quotation}
 \large
-\begin{align*}
+\begin{align}
+\label{eq:dimensional system}
 \left\{
 \begin{array}{ll}
 \left\{
@@ -84,13 +94,17 @@ y_{pi} = 0 \\
 y_{pi} = y - s_i + r_i \cos(\omega t - \varphi_i) - \sqrt{l_i^2 - r_i^2 \cos(\omega t - \varphi_i)}
 \end{array}
 \right.
-\end{align*}
+\end{align}
 \normalsize
 
 \begin{quotation}
 С учётом условия $r_i << l, l_i \approx l$ последнее уравнение будет: 
 
-\centering$y_{pi} = y - s_i + r_i \cos(\omega t - \varphi_i) - l$
+\large
+\begin{center}
+$y_{pi} = y - s_i + r_i \cos(\omega t - \varphi_i) - l$
+\end{center}
+\normalsize
 \end{quotation}
 
 \subsection{Безразмерный вид}
@@ -104,18 +118,19 @@ $f_i(\tau) = \varepsilon_i - \mu \gamma_i \cos(\tau - \varphi_i),$
 приходим к уравнениям, описывающим ударно-колебательные движения механизма в виде
 \end{quotation}
 
+\begin{center}
 \large
-$
+\begin{align}
+\label{eq:dimensionless system}
 \begin{cases}
 \frac{{d^2 x}}{{d \tau^2}} = -p, & x > f(\tau) \\[2mm]
 \frac{{dx}}{{d\tau}}|_+ = -R \frac{{dx}}{{d\tau}}|_- + (1 + R) \frac{{df(\tau)}}{{d\tau}}, & x = f(\tau), \quad \dot{x} - \frac{{df}}{{d\tau}} < 0
 \end{cases}
-$
-\\[8mm]
+\end{align}
 \large
-{
-$
+\begin{align}
+\label{eq:surface}
 f(\tau) = \max\{f_1(\tau), f_2(\tau), ..., f_N(\tau)\},\quad f_i(\tau) = \mathcal{E}_i - \mu \gamma_i \cos(\tau - \varphi_i)
-$
-}
+\end{align}
 \normalsize
+\end{center}
