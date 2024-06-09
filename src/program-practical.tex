@@ -1,0 +1,178 @@
+\section{Описание программы}
+
+Программа состоит из 4 файлов:
+
+\begin{itemize}
+\item \texttt{main.cpp} -- файл, содержащий точку входа программы. Он вызывает открытие окна, реализация которого находится в следующих файлах.
+\item \texttt{mainwindow.h} -- файл с описанием класса \texttt{mainwindow} и определением методов.
+\item \texttt{mainwindow.ui} -- содержит информацию о графическом представлении окна.
+\item \texttt{mainwindow.cpp} -- файл, который содержит реализацию методов и вычислений. Разберём этот файл.
+\end{itemize}
+
+\section*{Описание файла mainwindow.cpp}
+
+\begin{enumerate}
+\item Инициализация переменных
+
+В начале нужно проинициализировать все параметры, используемые в программе. Разберём каждую переменную за исключением вспомогательных. Переменные, помеченные как (*) в ходе программы могут меняться посредством графического интерфейса в виде ползунка.
+
+\begin{itemize}
+\item \texttt{N} -- кол-во поршней. (*)
+\item \texttt{step} -- итерационный шаг. Устанавливаем ему значение 0,01.
+\item \texttt{P} -- параметр $p$ системы (\ref{eq:dimensionless system}) (*)
+\item \texttt{R} -- параметр $R$ системы (\ref{eq:dimensionless system}) (*)
+\item \texttt{M} -- параметр $\mu$ системы (\ref{eq:dimensionless system})
+\item \texttt{xEnd} -- переменная, хранящая число, до которого будет вычисляться и выводиться график. Устанавливается значение \texttt{MAXX = 50} делённое на \texttt{P} и прибавляется \texttt{step} для корректного вывода конца графика.
+\item \texttt{xBegin, yBegin, zBegin} -- переменные, содержащие начальные значения (Метод Рунге-Кутты пункт \ref{initial_conditions}). Переводя в математический формат: $\tau_0 = 0, x_0 = 1, \dot x_0 = 1,5$
+\item \texttt{E1, E2, E3} -- параметры $\mathcal{E}_1, \mathcal{E}_2, \mathcal{E}_3$ уравнения (\ref{eq:surface})
+\item \texttt{U1, U2, U3} -- параметры $\varphi_1, \varphi_2, \varphi_3$ уравнения (\ref{eq:surface})
+\item \texttt{Y1, Y2, Y3} -- параметры $\gamma_1, \gamma_2, \gamma_3$ уравнения (\ref{eq:surface})
+\end{itemize}
+
+\begin{lstlisting}[caption=]
+#define MAXX 50
+static int N = 2, tmpN = N;
+const double step = 0.01;
+static double P = 1.5, tmpP = P, R = 0.95, tmpR = R, M = 0.15,
+              xEnd = MAXX / P + step;
+const double xBegin = 0, yBegin = 1, zBegin = 1.5;
+static double E1 = 0, E2 = 0, E3 = 0;
+static double U1 = 0, U2 = 2.5, U3 = 5;
+static double Y1 = 1, Y2 = 1, Y3 = 3;
+\end{lstlisting}
+\newpage
+\item Определение функций
+
+\begin{itemize}
+\item \texttt{double f(double z)} -- реализация функции $f(\dot x)$ (Метод Рунге-Кутты пункт \ref{intermediate_coefficients}).
+\item \texttt{double g(double x)} -- реализация функции $g(\tau)$ (Метод Рунге-Кутты пункт \ref{intermediate_coefficients}).
+\item \texttt{double surfaceFoo(double x, double E, double Y, double U)} -- реализация функции поверхности $f_i(\tau)$ (\ref{eq:surface}).
+\end{itemize}
+
+\begin{lstlisting}[caption=]
+double f(double z) { return z; }
+
+double g(double x) { return M * cos(x) - P; }
+
+double surfaceFoo(double x, double E, double Y, double U) {
+    return E - M * Y * cos(x - U);
+}
+\end{lstlisting}
+
+\begin{itemize}
+\item \lstinline`std::vector<std::pair<double, double>> buildFoo(funcSurface _f)` -- реализация функции построения поверхности $f(\tau)$ (\ref{eq:surface}). В результате выполнения функции мы получаем вектор точек по которым далее строится график поверхности.
+\end{itemize}
+
+\begin{lstlisting}
+std::vector<std::pair<double, double>> buildFoo(funcSurface _f) {
+    std::vector<std::pair<double, double>> points;
+    if (N == 1) {
+        for (double x = 0; x <= MAXX; x += step) {
+            points.push_back(std::make_pair(x, _f(x, E1, Y1, U1)));
+        }
+    } else if (N == 2) {
+        for (double x = 0; x <= MAXX; x += step) {
+            points.push_back(std::make_pair(
+                x, std::max(_f(x, E1, Y1, U1), _f(x, E2, Y2, U2))));
+        }
+    } else if (N == 3) {
+        for (double x = 0; x <= MAXX; x += step) {
+            points.push_back(std::make_pair(
+                x, std::max(_f(x, E1, Y1, U1),
+                            std::max(_f(x, E2, Y2, U2), _f(x, E3, Y3, U3)))));
+        }
+    }
+
+    return points;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\item \lstinline`std::vector<std::pair<double, double>> rungeKutta(double x0, double y0, double z0, funcF _f, funcG _g, std::vector<std::pair<double, double>> _surface)` -- реализация \hyperref[RKmathod]{метода Рунге-Кутты}. В результате выполнения функции мы получаем вектор точек по которым далее строится график.
+\end{itemize}
+
+\begin{lstlisting}
+std::vector<std::pair<double, double>> rungeKutta(
+    double x0, double y0, double z0, funcF _f, funcG _g,
+    std::vector<std::pair<double, double>> _surface) {
+    auto findYOnSurface = [&](double x) {
+        double closestY = _surface[0].second;
+        double minDist = std::fabs(_surface[0].first - x);
+        for (const auto& point : _surface) {
+            double dist = std::fabs(point.first - x);
+            if (dist < minDist) {
+                minDist = dist;
+                closestY = point.second;
+            }
+        }
+        return closestY;
+    };
+    std::vector<std::pair<double, double>> points;
+    while (x0 <= xEnd) {
+        points.push_back(std::make_pair(x0, y0));
+        double k1 = step * _f(z0);
+        double l1 = step * _g(x0);
+        double k2 = step * _f(z0 + l1 / 2);
+        double l2 = step * _g(x0 + step / 2);
+        double k3 = step * _f(z0 + l2 / 2);
+        double l3 = step * _g(x0 + step / 2);
+        double k4 = step * _f(z0 + l3);
+        double l4 = step * _g(x0 + step);
+
+        double nextY = y0 + (k1 + 2 * k2 + 2 * k3 + k4) / 6;
+        double nextZ = z0 + (l1 + 2 * l2 + 2 * l3 + l4) / 6;
+
+        double _surraceIt = findYOnSurface(x0 + step);
+        double derivative = calculate_derivative(_surface, x0 + step);
+        if (nextY <= _surraceIt && nextZ - derivative < 0)
+            nextZ = -R * nextZ + (1 + R) * derivative;
+
+        x0 += step;
+        if (nextY < _surraceIt) {
+            y0 = _surraceIt;
+        } else {
+            y0 = nextY;
+        }
+        z0 = nextZ;
+    }
+
+    return points;
+}
+\end{lstlisting}
+
+\begin{itemize}
+\item \lstinline`void MainWindow::draw()` -- реализация метода построения графиков по полученым точкам.
+\end{itemize}
+
+\begin{lstlisting}
+void MainWindow::draw() {
+    QVector<double> x, y, xSurf, ySurf;
+    for (const auto& point : surface) {
+        xSurf.append(point.first);
+        ySurf.append(point.second);
+    }
+    double maxY = std::numeric_limits<double>::min();
+    for (const auto& point : points) {
+        x.append(point.first);
+        y.append(point.second);
+        if (maxY < point.second) maxY = point.second;
+    }
+
+    ui->widget->clearGraphs();
+
+    ui->widget->xAxis->setRange(0, xEnd);
+    ui->widget->yAxis->setRange(-maxY / 3, maxY + maxY / 3);
+
+    ui->widget->addGraph();
+    ui->widget->graph(0)->setData(x, y);
+    ui->widget->graph(0)->setPen(QColor(Qt::blue));
+
+    ui->widget->addGraph();
+    ui->widget->graph(1)->setData(xSurf, ySurf);
+    ui->widget->graph(1)->setPen(QColor(Qt::red));
+
+    ui->widget->replot();
+}
+\end{lstlisting}
+
+\end{enumerate}
